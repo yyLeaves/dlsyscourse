@@ -54,7 +54,7 @@ def parse_mnist(image_filename, label_filename):
         image_data = image_data.reshape((size, nrows, ncols))
 
     image_data = image_data.reshape(size,-1).astype(np.float32)
-    image_data = image_data / (image_data.max() - image_data.min())
+    image_data = (image_data - image_data.min()) / (image_data.max() - image_data.min())
 
     with gzip.open(label_filename, 'rb') as f:
         magic, nlabels = struct.unpack(">II", f.read(8))
