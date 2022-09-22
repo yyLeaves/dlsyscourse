@@ -5,11 +5,116 @@
 
 namespace py = pybind11;
 
-float* matdot(const float *X, const float *B, size_t b_start, size_t b_end, size_t m, size_t k) {
-  float* 
+float* batch_mul(const float *X, const float *W, size_t b_start, size_t b_end, size_t n, size_t k) {
+  // X - (b_size * n)
+  // n - input dim
+  // k - number of classes
+  // W (theata) - weight matrix (n * k)
+
+  // return matrix - M (b_size * k)
+  float* M = new float[(b_end - b_start) * k];
+  
+  // for every example in the batch X->(1*n)
   for(size_t i = b_start; i < b_end; i++) {
+
+    // for every feature in the example W->(n*1)
+    for(size_t j = 0; j < k; j++) {
+
+      // element M[i-b_start, j]
+      float m = 0;
+
+      // for every row k in X, every column k in W
+      for(size_t z = 0; z < n; z++) {
+
+        // X[i, z] * W[z, j]
+        m += X[i*n+z] * W[z*k+j];
+      }
+
+      // M[]
+      M[(i - b_start) * k + j] = m;
+
+    }
+  }
+  return M;
+}
+
+// update inside the matrix M
+void softmax(float *M, size_t b_size, size_t k) {
+  // M - (b_size * n)
+
+  for(size_t i = 0; i < b_size; i++) {
+
+    float e_sum_i = 0;
+
+    for(size_t j = 0; j < k; j++) {
+      M[i*k+j] = exp(M[i*k+j]);
+      e_sum_i += M[i*k+j];
+    }
+
+    for(size_t j = 0; j < k; j++) {
+      M[i*k+j] /= e_sum_i;
+    }
+  }
+}
+
+// get one-hot encoding matrix I for labels y in a batch
+float* eye(const unsigned char *y, size_t k, size_t b_start, size_t b_end) {
+
+  float* M = new float[(b_end - b_start) * k];
+
+  for(size_t i = b_start; i < b_end; i++) {
+
+    for(size_t j = 0; j < k; j++) {
+      
+      if (y[i] == j) {
+
+        M[(i - b_start)*k+j] = 1;
+      } else {
+
+        M[(i - b_start)*k+j] = 0;
+      }
+    }
+  }
+
+  return M;
+}
+
+
+// two matrix are of the same size (m * n)
+void subtract(float *A, float *B, size_t m, size_t n) {
+
+  for(size_t i = 0; i < m; i++) {
+    
+    for(size_t j = 0; j < n; j++) {
+      A[i*n+j] -= B[i*n+j];
+    }
+  }
+}
+
+
+float* transpose(const float *X, size_t b_start, size_t b_end, size_t n) {
+
+  float *M = new float[n * (b_end - b_start)];
+
+  for(size_t i = b_start; i < b_end; i++) {
+
     for(size_t j = 0; j < n; j++) {
 
+      M[j*(b_end-b_start)+i-b_start] = X[i*n+j];
+    }
+  }
+
+  return M;
+}
+
+
+void matmul_scaler(float *X, float s, size_t m, size_t n) {
+
+  for(size_t i = 0; i < m; i++) {
+
+    for(size_t j = 0; j < n; j++) {
+
+      X[i * n + j] *= s;
     }
   }
 }
@@ -45,11 +150,23 @@ void softmax_regression_epoch_cpp(const float *X, const unsigned char *y,
     /// BEGIN YOUR CODE
 
     for (size_t i = 0; i < m; i += batch) {
-      // forward propagation - calc logits
+      // printf("-");
 
+      // forward propagation - calc logits
+      float *Z = batch_mul(X, theta, i, i+batch, n, k);
+
+      // softmax (with the assumption that all batches are of the same size)
+      softmax(Z, batch, k);
 
       // back propagation - calc gradient
+      float *I = eye(y, k, i, i+batch);
+      float *X_T = transpose(X, i, i+batch, n);
+      subtract(Z, I, batch, k);
 
+      // gradient descent
+      float *G = batch_mul(X_T, Z, 0, n, batch, k);
+      matmul_scaler(G, (float)lr/(float)batch, n, k);
+      subtract(theta, G, n, k);
     }
 
     
