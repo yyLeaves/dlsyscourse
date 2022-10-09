@@ -341,6 +341,7 @@ def test_summation_backward():
     gradient_check(ndl.summation, ndl.Tensor(np.random.randn(5,4)), axes=(0,))
     gradient_check(ndl.summation, ndl.Tensor(np.random.randn(5,4)), axes=(0,1))
     gradient_check(ndl.summation, ndl.Tensor(np.random.randn(5,4,1)), axes=(0,1))
+    gradient_check(ndl.summation, ndl.Tensor(np.random.randn(3,2,1)))
 
 
 def submit_backward():
