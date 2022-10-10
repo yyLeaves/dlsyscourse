@@ -7,7 +7,7 @@ sys.path.append('python/')
 import needle as ndl
 
 
-def parse_mnist(image_filesname, label_filename):
+def parse_mnist(image_filename, label_filename):
     """ Read an images and labels file in MNIST format.  See this page:
     http://yann.lecun.com/exdb/mnist/ for a description of the file format.
 
@@ -30,7 +30,19 @@ def parse_mnist(image_filesname, label_filename):
                 for MNIST will contain the values 0-9.
     """
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    with gzip.open(image_filename,'rb') as f:
+        magic, size, nrows, ncols = struct.unpack(">IIII", f.read(16))
+        image_data = np.frombuffer(f.read(), dtype=np.dtype(np.uint8).newbyteorder('>'))
+        image_data = image_data.reshape((size, nrows, ncols))
+
+    image_data = image_data.reshape(size,-1).astype(np.float32)
+    image_data = (image_data - image_data.min()) / (image_data.max() - image_data.min())
+
+    with gzip.open(label_filename, 'rb') as f:
+        magic, nlabels = struct.unpack(">II", f.read(8))
+        label_data = np.frombuffer(f.read(), dtype=np.dtype(np.uint8).newbyteorder('>'))
+
+    return (image_data, label_data)
     ### END YOUR SOLUTION
 
 
@@ -51,7 +63,12 @@ def softmax_loss(Z, y_one_hot):
         Average softmax loss over the sample. (ndl.Tensor[np.float32])
     """
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    e_z_sum = ndl.ops.exp(Z).sum(axes=(1,))
+    z_i_sum = ndl.ops.log(e_z_sum).sum()
+
+    z_y = (Z * y_one_hot).sum()
+
+    return (z_i_sum - z_y) / Z.shape[0]
     ### END YOUR SOLUTION
 
 
@@ -80,6 +97,8 @@ def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
     """
 
     ### BEGIN YOUR SOLUTION
+
+
     raise NotImplementedError()
     ### END YOUR SOLUTION
 

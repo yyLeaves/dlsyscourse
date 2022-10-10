@@ -229,8 +229,10 @@ class Summation(TensorOp):
 
         if self.axes is not None:
           new_shape = list(in_shape)
+
           for a in self.axes:
             new_shape[a] = 1
+            
         else:
           new_shape = array_api.ones(len(in_shape), dtype=int)
 
@@ -294,12 +296,11 @@ class Log(TensorOp):
     def compute(self, a):
         ### BEGIN YOUR SOLUTION
         return array_api.log(a)
-        # raise NotImplementedError()
         ### END YOUR SOLUTION
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return out_grad / node.inputs[0]
         ### END YOUR SOLUTION
 
 
@@ -315,7 +316,7 @@ class Exp(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        return out_grad * array_api.exp(out_grad)
+        return out_grad * exp(node.inputs[0])
         ### END YOUR SOLUTION
 
 
@@ -327,11 +328,13 @@ def exp(a):
 class ReLU(TensorOp):
     def compute(self, a):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return array_api.maximum(0, a)
         ### END YOUR SOLUTION
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
+        x = node.inputs[0]
+        return out_grad * x.realize_cached_data()
         raise NotImplementedError()
         ### END YOUR SOLUTION
 
