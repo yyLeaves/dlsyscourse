@@ -404,10 +404,13 @@ def compute_gradient_of_variables(output_tensor, out_grad):
 
       if node.is_leaf():
         continue
+
       for i, grad in enumerate(node.op.gradient_as_tuple(node.grad, node)):
           j =  node.inputs[i]
+
           if j not in node_to_output_grads_list:
               node_to_output_grads_list[j] = []
+
           node_to_output_grads_list[j].append(grad)
     ### END YOUR SOLUTION
 
@@ -434,7 +437,6 @@ def find_topo_sort(node_list: List[Value]) -> List[Value]:
 def topo_sort_dfs(node, visited, topo_order):
     """Post-order DFS"""
     ### BEGIN YOUR SOLUTION
-
     if node in visited:
       return
     

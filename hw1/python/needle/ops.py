@@ -334,8 +334,7 @@ class ReLU(TensorOp):
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
         x = node.inputs[0]
-        return out_grad * x.realize_cached_data()
-        raise NotImplementedError()
+        return out_grad * (x.realize_cached_data()>0)
         ### END YOUR SOLUTION
 
 

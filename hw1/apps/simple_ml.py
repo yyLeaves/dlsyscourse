@@ -97,9 +97,25 @@ def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
     """
 
     ### BEGIN YOUR SOLUTION
+    m = X.shape[0]    
 
+    for i in range(0, m, batch):
+      X_ = ndl.Tensor(X[i:i+batch], dtype="float32")
+      y_ = y[i:i+batch]
 
-    raise NotImplementedError()
+      Z1 = ndl.ops.relu(X_@W1)
+      Z2 = Z1 @ W2
+
+      I_y = np.zeros(Z2.shape)
+      I_y[np.arange(Z2.shape[0]), y_] = 1
+
+      loss = softmax_loss(Z2, I_y)
+      loss.backward()
+
+      W1 = (W1 - lr * W1.grad).detach()
+      W2 = (W2 - lr * W2.grad).detach()
+
+    return (W1, W2)
     ### END YOUR SOLUTION
 
 

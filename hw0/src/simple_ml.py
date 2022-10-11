@@ -148,7 +148,6 @@ def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
     """
     ### BEGIN YOUR CODE
     m = X.shape[0]    
-    k = W2.shape[1]
 
     for i in range(0, m, batch):
 
@@ -164,9 +163,6 @@ def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
 
         W1[:,:] = W1 - lr * X_.T @ G1 / len(y_)
         W2[:,:] = W2 - lr * Z1.T @ G2 / len(y_)
-
-
-    pass
     ### END YOUR CODE
 
 
