@@ -95,9 +95,7 @@ class Linear(Module):
 
     def forward(self, X: Tensor) -> Tensor:
         ### BEGIN YOUR SOLUTION
-        print(X.shape, self.weight.shape)
         return X.matmul(self.weight) + self.bias.broadcast_to((X.shape[0], self.out_features))
-        raise NotImplementedError()
         ### END YOUR SOLUTION
 
 
@@ -112,7 +110,7 @@ class Flatten(Module):
 class ReLU(Module):
     def forward(self, x: Tensor) -> Tensor:
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return ops.relu(x)
         ### END YOUR SOLUTION
 
 
@@ -123,7 +121,9 @@ class Sequential(Module):
 
     def forward(self, x: Tensor) -> Tensor:
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        for mod in self.modules:
+          x = mod(x)
+        return x
         ### END YOUR SOLUTION
 
 
